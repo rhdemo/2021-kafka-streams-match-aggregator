@@ -69,7 +69,7 @@ public class TopologyProducerTest {
     }
 
     @Test
-    public void testTopology(){        
+    public void testTopology(){
         matches.pipeInput(
             createKeyFromJson(matchStartPayload),
             matchStartPayload.encode()

@@ -31,7 +31,7 @@ public class AggregatorTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        
+
         attackJson = readFileAsString("src/test/resources/attack.json");
     }
 
