@@ -56,7 +56,7 @@ public class Aggregate {
 
         if (type.equals(PAYLOAD_START)) {
             LOG.debug("received match-start payload");
-            
+
             // Record basic match metadata
             aggregate.put(AGGREGATE_KEY_GAME_ID, data.getString(INCOMING_KEY_GAME_ID));
             aggregate.put(AGGREGATE_KEY_MATCH_ID, data.getString(INCOMING_KEY_MATCH_ID));
@@ -80,7 +80,7 @@ public class Aggregate {
 
             JsonArray turnsArray = aggregate.getJsonArray(AGGREGATE_KEY_TURNS);
             JsonObject turnObject = new JsonObject();
-            
+
             turnObject.put(AGGREGATE_TURNS_KEY_DESTROYED, data.getString(INCOMING_KEY_ATTACK_DESTROYED));
             turnObject.put(AGGREGATE_TURNS_KEY_HIT, data.getBoolean(INCOMING_KEY_ATTACK_HIT));
             turnObject.put(AGGREGATE_TURNS_KEY_ORIGIN, data.getString(INCOMING_KEY_ATTACK_ORIGIN));
@@ -94,7 +94,7 @@ public class Aggregate {
 
             turnsArray.add(turnObject);
         } else {
-            LOG.warn("received unknown payload type: " + type);
+            LOG.warn("received unknown payload type \"" + type + "\". Not updating aggregate.");
         }
 
         return aggregate;
