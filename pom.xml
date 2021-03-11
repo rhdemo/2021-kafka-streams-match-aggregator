@@ -3,11 +3,10 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.acme</groupId>
-  <artifactId>2021-kafka-streams-match-aggregator</artifactId>
+  <artifactId>2021-kafka-streams</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
-    <module>producer</module>
     <module>aggregator</module>
   </modules>
 </project>

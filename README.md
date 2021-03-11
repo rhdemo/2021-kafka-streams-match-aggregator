@@ -1,6 +1,5 @@
 # 2021 Kafka Streams Match Aggregator
 
-
 This application will receive match events via a Kafka Topic, and aggregate
 them into complete records over time.
 
@@ -9,36 +8,27 @@ them into complete records over time.
 To build the _aggregator_ application, run
 
 ```bash
-mvn clean install
+./mvnw package
+```
+
+To build a Docker container image:
+
+```bash
+./scripts/build.sh
 ```
 
 ## Running
 
-A Docker Compose file is provided for running all the components.
-Start all containers by running
+```
+./scripts/build.sh
 
-```bash
-docker-compose up -d --build
+export KAFKA_SVC_USERNAME=username
+export KAFKA_SVC_PASSWORD=username
+export KAFKA_BOOTSTRAP_URL=hostname.kafka.devshift.org:443
+
+./scripts/run.sh
 ```
 
-Now run an instance of the _debezium/tooling_ image which comes with several useful tools such as _kafkacat_ and _httpie_:
-
-```bash
-docker run --tty --rm -i --network ks debezium/tooling:1.1
-```
-
-In the tooling container, run _kafkacat_ to examine the results of the streaming pipeline:
-
-```bash
-kafkacat -b kafka:9092 -C -o beginning -q -t temperatures-aggregated
-```
-
-You also can obtain the current aggregated state for a given weather station using _httpie_,
-which will invoke an Kafka Streams interactive query for that value:
-
-```bash
-http aggregator:8080/weather-stations/data/1
-```
 
 ## Scaling
 

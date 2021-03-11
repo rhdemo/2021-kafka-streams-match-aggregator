@@ -97,6 +97,8 @@ public class Aggregate {
             LOG.warn("received unknown payload type \"" + type + "\". Not updating aggregate.");
         }
 
+        LOG.trace("updated aggregate JSON: " + aggregate.encode());
+
         return aggregate;
     }
 }

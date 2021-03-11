@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
+import org.apache.kafka.common.security.JaasContext;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.StreamsConfig;
@@ -49,6 +50,7 @@ public class TopologyProducerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
+
         matchStartPayload = new JsonObject(readFileAsString("src/test/resources/match-start.json"));
         attackPayload = new JsonObject(readFileAsString("src/test/resources/attack.json"));
         matchEndPayload = new JsonObject(readFileAsString("src/test/resources/match-end.json"));
@@ -56,6 +58,7 @@ public class TopologyProducerTest {
         Properties config = new Properties();
         config.put(StreamsConfig.APPLICATION_ID_CONFIG, "testApplicationId");
         config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "dummy:1234");
+
         testDriver = new TopologyTestDriver(topology, config);
 
         matches = testDriver.createInputTopic(MATCHES_TOPIC, new StringSerializer(), new StringSerializer());

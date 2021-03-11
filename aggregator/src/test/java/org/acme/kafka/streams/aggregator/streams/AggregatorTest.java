@@ -28,11 +28,13 @@ public class AggregatorTest {
 
     String matchStartJson;
     String attackJson;
+    String matchEndJson;
 
     @BeforeEach
     public void setUp() throws Exception {
-
+        matchStartJson = readFileAsString("src/test/resources/match-start.json");
         attackJson = readFileAsString("src/test/resources/attack.json");
+        matchEndJson = readFileAsString("src/test/resources/match-start.json");
     }
 
     @AfterEach
