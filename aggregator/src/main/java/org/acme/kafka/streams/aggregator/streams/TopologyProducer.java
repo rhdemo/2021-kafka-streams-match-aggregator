@@ -20,7 +20,7 @@ import io.vertx.core.json.JsonObject;
 public class TopologyProducer {
     // All match events are written to this topic. These events have varying structure
     // so we do a little magic and filtering below to manage that complexity
-    static final String MATCHES_TOPIC = "matches";
+    static final String MATCHES_TOPIC = "match-updates";
     static final String AGGREGATE_TOPIC = "matches-aggregated";
     static final String MATCHES_STORE = "matches-store";
 
@@ -40,7 +40,7 @@ public class TopologyProducer {
                 (key, value, aggregate) -> {
                     JsonObject incomingJson = new JsonObject(value);
                     JsonObject aggregateJson;
-                    
+
                     if (aggregate.length() > 0) {
                         // Create a JSON object from existing aggregate data
                         aggregateJson = new JsonObject(aggregate);
