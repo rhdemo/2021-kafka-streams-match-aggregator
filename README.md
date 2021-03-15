@@ -1,7 +1,20 @@
 # 2021 Kafka Streams Match Aggregator
 
 This application will receive match events via a Kafka Topic, and aggregate
-them into complete records over time.
+them into complete records over time. A completely aggregated match object is
+a large JSON payload - an example can be [found here](https://gist.github.com/evanshortiss/a70f3ca9710663734223698b0e8ed6cc).
+
+## HTTP API
+
+Aggregated records can be retrieved by the HTTP API that this service exposes.
+A known game ID and match ID are required to fetch a record.
+
+```bash
+export GAME_ID=c538ddcce22a3a58
+export MATCH_ID=OUc5u3ZdLtVw2A8nYWFap
+
+curl http://localhost:8080/games/$GAME_ID/matches/$MATCH_ID
+```
 
 ## Building
 

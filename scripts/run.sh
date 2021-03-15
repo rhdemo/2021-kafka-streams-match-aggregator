@@ -4,6 +4,7 @@ IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-quay.io/redhatdemo/2021-kafka-streams-match
 
 docker run \
 --rm \
+-p 8080:8080 \
 --name kafka-streams-match-aggregator \
 -e LOG_LEVEL=TRACE \
 -e KAFKA_SVC_USERNAME=$KAFKA_SVC_USERNAME \
