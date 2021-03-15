@@ -81,6 +81,10 @@ public class Aggregate {
             JsonArray turnsArray = aggregate.getJsonArray(AGGREGATE_KEY_TURNS);
             JsonObject turnObject = new JsonObject();
 
+            if (turnsArray == null) {
+                turnsArray = new JsonArray();
+            }
+
             turnObject.put(AGGREGATE_TURNS_KEY_DESTROYED, data.getString(INCOMING_KEY_ATTACK_DESTROYED));
             turnObject.put(AGGREGATE_TURNS_KEY_HIT, data.getBoolean(INCOMING_KEY_ATTACK_HIT));
             turnObject.put(AGGREGATE_TURNS_KEY_ORIGIN, data.getString(INCOMING_KEY_ATTACK_ORIGIN));
