@@ -1,7 +1,11 @@
 package org.acme.kafka.streams.aggregator.rest;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -14,11 +18,16 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.acme.kafka.streams.aggregator.streams.QueryResult;
+import org.jboss.logging.Logger;
 import org.acme.kafka.streams.aggregator.streams.InteractiveQueries;
+import org.acme.kafka.streams.aggregator.streams.PipelineMetadata;
 
 @ApplicationScoped
 @Path("/games")
 public class MatchAggregatesEndpoint {
+    private static final Logger LOG = Logger.getLogger(MatchAggregatesEndpoint.class);
+
+    String kubeNs = System.getenv("NAMESPACE");
 
     @Inject
     InteractiveQueries interactiveQueries;
@@ -34,17 +43,57 @@ public class MatchAggregatesEndpoint {
         if (result.getResult().isPresent()) {
             return Response.ok(result.getResult().get()).build();
         } else if (result.getHost().isPresent()) {
-            URI otherUri = getOtherUri(result.getHost().get(), result.getPort().getAsInt(), gameId, matchId);
-            return Response.seeOther(otherUri).build();
+            URL url = getOtherUrl(result.getHost().get(), result.getPort().getAsInt(), gameId, matchId);
+            LOG.debug("get for key/id was found in node at URL: " + url.toString());
+            try {
+                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setDoOutput(true);
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String inputLine;
+                StringBuffer content = new StringBuffer();
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
+                in.close();
+
+                return Response.ok(content).build();
+            } catch (Exception e) {
+                LOG.error("error fetching: " + url.toString());
+                LOG.error("error details: " + e.toString());
+                return Response.status(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "{ \"info\": \"Error fetching data from other Kafka Streams node\" }").build();
+            }
         } else {
             return Response.status(Status.NOT_FOUND.getStatusCode(), "No data found for weather station " + id).build();
         }
     }
 
-    private URI getOtherUri(String host, int port, String gameId, String matchId) {
+    @GET
+    @Path("/meta-data")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<PipelineMetadata> getMetaData() {
+        return interactiveQueries.getMetaData();
+    }
+
+    /**
+     * When running in a Kubernetes/OpenShift StatefulSet we need to include
+     * the Pod's namespace/headless service name when creating the hostname.
+     */
+    private String getPodHostname (String host) {
+        if (kubeNs != null) {
+            return host + "." + kubeNs;
+        } else {
+            return host;
+        }
+    }
+
+    private URL getOtherUrl(String host, int port, String gameId, String matchId) {
         try {
-            return new URI("http://" + host + ":" + port + "/games/" + gameId + "/matches/" + matchId);
-        } catch (URISyntaxException e) {
+            return new URL("http://" + getPodHostname(host) + ":" + port + "/games/" + gameId + "/matches/" + matchId);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

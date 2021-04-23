@@ -10,7 +10,6 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
-import org.apache.kafka.common.security.JaasContext;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.StreamsConfig;

@@ -51,8 +51,8 @@ public class Aggregate {
         String type = incoming.getString("type");
         JsonObject data = incoming.getJsonObject("data");
 
-        LOG.trace("processing payload:");
-        LOG.trace(incoming.toString());
+        LOG.debug("processing payload:");
+        LOG.debug(incoming.toString());
 
         if (type.equals(PAYLOAD_START)) {
             LOG.debug("received match-start payload");
@@ -101,7 +101,7 @@ public class Aggregate {
             LOG.warn("received unknown payload type \"" + type + "\". Not updating aggregate.");
         }
 
-        LOG.trace("updated aggregate JSON: " + aggregate.encode());
+        LOG.debug("updated aggregate JSON: " + aggregate.encode());
 
         return aggregate;
     }
