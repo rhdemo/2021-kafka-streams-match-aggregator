@@ -12,6 +12,7 @@ import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
 import org.apache.kafka.streams.state.Stores;
+import org.jboss.logging.Logger;
 
 import io.vertx.core.json.JsonObject;
 
@@ -23,6 +24,8 @@ public class TopologyProducer {
     static final String MATCHES_TOPIC = "match-updates";
     static final String AGGREGATE_TOPIC = "matches-aggregated";
     static final String MATCHES_STORE = "matches-store";
+
+    private static final Logger LOG = Logger.getLogger(TopologyProducer.class);
 
     @Produces
     public Topology buildTopology() {
@@ -38,14 +41,17 @@ public class TopologyProducer {
             .aggregate(
                 String::new,
                 (key, value, aggregate) -> {
+                    LOG.info("processing record for key: " +  key);
                     JsonObject incomingJson = new JsonObject(value);
                     JsonObject aggregateJson;
 
                     if (aggregate.length() > 0) {
+                        LOG.info("existing aggregate found, will append");
                         // Create a JSON object from existing aggregate data
                         aggregateJson = new JsonObject(aggregate);
                     } else {
                         // Create a new empty JSON object
+                        LOG.info("no existing aggregate. creating initial JSON object");
                         aggregateJson = new JsonObject();
                     }
 

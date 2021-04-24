@@ -1,0 +1,49 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  creationTimestamp: "2021-04-23T12:07:51Z"
+  generation: 1
+  labels:
+    strimzi.io/cluster: demo2021
+  managedFields:
+  - apiVersion: kafka.strimzi.io/v1beta1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:labels:
+          .: {}
+          f:strimzi.io/cluster: {}
+      f:spec:
+        .: {}
+        f:config:
+          .: {}
+          f:cleanup.policy: {}
+          f:message.timestamp.type: {}
+        f:partitions: {}
+        f:replicas: {}
+        f:topicName: {}
+      f:status:
+        .: {}
+        f:conditions: {}
+        f:observedGeneration: {}
+    manager: okhttp
+    operation: Update
+    time: "2021-04-23T12:07:51Z"
+  name: match-aggregator-matches-store-changelog
+  namespace: game-kafka
+  resourceVersion: "8521627"
+  selfLink: /apis/kafka.strimzi.io/v1beta2/namespaces/game-kafka/kafkatopics/match-aggregator-matches-store-changelog
+  uid: a48ea944-486a-43b6-b488-f8d77255ca05
+spec:
+  config:
+    cleanup.policy: compact
+    message.timestamp.type: CreateTime
+  partitions: 50
+  replicas: 1
+  topicName: match-aggregator-matches-store-changelog
+status:
+  conditions:
+  - lastTransitionTime: "2021-04-23T12:07:51.741316Z"
+    status: "True"
+    type: Ready
+  observedGeneration: 1

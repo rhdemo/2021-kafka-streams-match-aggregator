@@ -40,6 +40,11 @@ public class InteractiveQueries {
     }
 
     public QueryResult getPlayerMatchesStore(String id) {
+        // KeyQueryMetadata metadata = streams.queryMetadataForKey(
+        //         TopologyProducer.MATCHES_STORE,
+        //         id,
+        //         Serdes.String().serializer()
+        // );
         StreamsMetadata metadata = streams.metadataForKey(
                 TopologyProducer.MATCHES_STORE,
                 id,
@@ -51,7 +56,7 @@ public class InteractiveQueries {
         } else if (metadata.host().equals(host)) {
             LOG.infov("Found data for key {0} locally", id);
             String result = getPlayerMatchesStore().get(id);
-
+            LOG.info("Query result:" + result);
             if (result != null) {
                 return QueryResult.found(result);
             } else {

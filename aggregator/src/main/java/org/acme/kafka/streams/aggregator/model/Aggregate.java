@@ -51,11 +51,11 @@ public class Aggregate {
         String type = incoming.getString("type");
         JsonObject data = incoming.getJsonObject("data");
 
-        LOG.debug("processing payload:");
-        LOG.debug(incoming.toString());
+        LOG.info("processing payload:");
+        LOG.info(incoming.toString());
 
         if (type.equals(PAYLOAD_START)) {
-            LOG.debug("received match-start payload");
+            LOG.info("received match-start payload");
 
             // Record basic match metadata
             aggregate.put(AGGREGATE_KEY_GAME_ID, data.getString(INCOMING_KEY_GAME_ID));
@@ -65,7 +65,7 @@ public class Aggregate {
             aggregate.put(AGGREGATE_KEY_PLAYER_B, data.getJsonObject(INCOMING_KEY_PLAYER_B));
             aggregate.put(AGGREGATE_KEY_TURNS, new JsonArray());
         } else if (type.equals(PAYLOAD_END)){
-            LOG.debug("received match-end payload");
+            LOG.info("received match-end payload");
 
             // Note the winner's UUID
             aggregate.put(
@@ -76,7 +76,7 @@ public class Aggregate {
             // Record the match end timestamp
             aggregate.put(AGGREGATE_KEY_TS_END, data.getLong(INCOMING_KEY_TS));
         } else if (type.equals(PAYLOAD_ATTACK)) {
-            LOG.debug("received attack payload");
+            LOG.info("received attack payload");
 
             JsonArray turnsArray = aggregate.getJsonArray(AGGREGATE_KEY_TURNS);
             JsonObject turnObject = new JsonObject();
@@ -101,7 +101,7 @@ public class Aggregate {
             LOG.warn("received unknown payload type \"" + type + "\". Not updating aggregate.");
         }
 
-        LOG.debug("updated aggregate JSON: " + aggregate.encode());
+        LOG.info("updated aggregate JSON: " + aggregate.encode());
 
         return aggregate;
     }

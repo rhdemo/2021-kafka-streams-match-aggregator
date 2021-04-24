@@ -27,7 +27,7 @@ import org.acme.kafka.streams.aggregator.streams.PipelineMetadata;
 public class MatchAggregatesEndpoint {
     private static final Logger LOG = Logger.getLogger(MatchAggregatesEndpoint.class);
 
-    String kubeNs = System.getenv("NAMESPACE");
+    String serviceName = System.getenv("SERVICE_NAME");
 
     @Inject
     InteractiveQueries interactiveQueries;
@@ -40,14 +40,19 @@ public class MatchAggregatesEndpoint {
         String id = gameId + ":" + matchId;
 
         QueryResult result = interactiveQueries.getPlayerMatchesStore(id);
+        LOG.info("result for " + id + " is on host:" + result.getHost());
+        LOG.info("result is present:" + result.getResult().isPresent());
         if (result.getResult().isPresent()) {
+            LOG.info("returning result from self");
             return Response.ok(result.getResult().get()).build();
         } else if (result.getHost().isPresent()) {
             URL url = getOtherUrl(result.getHost().get(), result.getPort().getAsInt(), gameId, matchId);
-            LOG.debug("get for key/id was found in node at URL: " + url.toString());
+            LOG.info("get for key/id was found in node at URL: " + url.toString());
             try {
                 HttpURLConnection conn = (HttpURLConnection)url.openConnection();
                 conn.setRequestMethod("GET");
+                conn.setRequestProperty("User-Agent","Mozilla/5.0 ( compatible ) ");
+                conn.setRequestProperty("Accept","*/*");
                 conn.setDoOutput(true);
                 conn.setConnectTimeout(5000);
                 conn.setReadTimeout(5000);
@@ -63,11 +68,13 @@ public class MatchAggregatesEndpoint {
                 return Response.ok(content).build();
             } catch (Exception e) {
                 LOG.error("error fetching: " + url.toString());
-                LOG.error("error details: " + e.toString());
+                e.printStackTrace();
                 return Response.status(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "{ \"info\": \"Error fetching data from other Kafka Streams node\" }").build();
             }
         } else {
-            return Response.status(Status.NOT_FOUND.getStatusCode(), "No data found for weather station " + id).build();
+            String msg = "no data found for match " + matchId + " from game " + gameId;
+            LOG.info(msg);
+            return Response.status(Status.NOT_FOUND.getStatusCode(), msg).build();
         }
     }
 
@@ -80,11 +87,11 @@ public class MatchAggregatesEndpoint {
 
     /**
      * When running in a Kubernetes/OpenShift StatefulSet we need to include
-     * the Pod's namespace/headless service name when creating the hostname.
+     * the headless service name when creating the hostname.
      */
     private String getPodHostname (String host) {
-        if (kubeNs != null) {
-            return host + "." + kubeNs;
+        if (serviceName != null) {
+            return host + "." + serviceName;
         } else {
             return host;
         }
