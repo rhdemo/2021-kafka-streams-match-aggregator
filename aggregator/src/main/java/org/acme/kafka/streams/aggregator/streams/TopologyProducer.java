@@ -60,12 +60,12 @@ public class TopologyProducer {
                 Materialized.<String, String>as(storeSupplier)
                     .withKeySerde(Serdes.String())
                     .withValueSerde(Serdes.String())
-            )
-            .toStream()
-            .to(
-                AGGREGATE_TOPIC,
-                Produced.with(Serdes.String(), Serdes.String())
             );
+            // .toStream()
+            // .to(
+            //     AGGREGATE_TOPIC,
+            //     Produced.with(Serdes.String(), Serdes.String())
+            // );
 
         return builder.build();
     }
