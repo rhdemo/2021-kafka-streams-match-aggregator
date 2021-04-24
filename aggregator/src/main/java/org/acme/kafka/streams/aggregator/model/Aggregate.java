@@ -1,5 +1,12 @@
 package org.acme.kafka.streams.aggregator.model;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.vertx.core.json.JsonArray;
@@ -8,6 +15,7 @@ import io.vertx.core.json.JsonObject;
 @RegisterForReflection
 public class Aggregate {
     final public static String INCOMING_KEY_TS = "ts";
+    final public static String INCOMING_KEY_CLUSTER = "cluster";
     final public static String INCOMING_KEY_GAME_ID = "game";
     final public static String INCOMING_KEY_MATCH_ID = "match";
     final public static String INCOMING_KEY_PLAYER_A = "playerA";
@@ -32,6 +40,8 @@ public class Aggregate {
     final public static String AGGREGATE_KEY_TS_END = "endTs";
     final public static String AGGREGATE_KEY_WINNER = "winner";
     final public static String AGGREGATE_KEY_TURNS = "turns";
+    final public static String AGGREGATE_KEY_CLUSTER = "cluster";
+
 
     final public static String AGGREGATE_TURNS_KEY_ORIGIN = "origin";
     final public static String AGGREGATE_TURNS_KEY_DESTROYED = "destroyed";
@@ -44,6 +54,11 @@ public class Aggregate {
     final public static String PAYLOAD_ATTACK = "attack";
 
     private static final Logger LOG = Logger.getLogger(Aggregate.class);
+    private static final String REPLAY_TRACKER_ENDPOINT = System.getenv("REPLAY_TRACKER_ENDPOINT");
+
+    @ConfigProperty(name = "send-to-tracker")
+    static
+    String sendToTracker;
 
     public JsonObject match;
 
@@ -58,9 +73,11 @@ public class Aggregate {
             LOG.info("received match-start payload");
 
             // Record basic match metadata
+            aggregate.put(AGGREGATE_KEY_TS_START, incoming.getLong(INCOMING_KEY_TS));
+            aggregate.put(AGGREGATE_KEY_CLUSTER, incoming.getString(INCOMING_KEY_CLUSTER));
+
             aggregate.put(AGGREGATE_KEY_GAME_ID, data.getString(INCOMING_KEY_GAME_ID));
             aggregate.put(AGGREGATE_KEY_MATCH_ID, data.getString(INCOMING_KEY_MATCH_ID));
-            aggregate.put(AGGREGATE_KEY_TS_START, data.getLong(INCOMING_KEY_TS));
             aggregate.put(AGGREGATE_KEY_PLAYER_A, data.getJsonObject(INCOMING_KEY_PLAYER_A));
             aggregate.put(AGGREGATE_KEY_PLAYER_B, data.getJsonObject(INCOMING_KEY_PLAYER_B));
             aggregate.put(AGGREGATE_KEY_TURNS, new JsonArray());
@@ -74,7 +91,9 @@ public class Aggregate {
             );
 
             // Record the match end timestamp
-            aggregate.put(AGGREGATE_KEY_TS_END, data.getLong(INCOMING_KEY_TS));
+            aggregate.put(AGGREGATE_KEY_TS_END, incoming.getLong(INCOMING_KEY_TS));
+
+            postGameToReplayTracker(aggregate);
         } else if (type.equals(PAYLOAD_ATTACK)) {
             LOG.info("received attack payload");
 
@@ -104,5 +123,47 @@ public class Aggregate {
         LOG.info("updated aggregate JSON: " + aggregate.encode());
 
         return aggregate;
+    }
+
+    private static void postGameToReplayTracker (JsonObject completeGameRecord) {
+        if (sendToTracker == "false") {
+            return;
+        }
+
+        String key = completeGameRecord.getString(AGGREGATE_KEY_GAME_ID) + ":" + completeGameRecord.getString(AGGREGATE_KEY_MATCH_ID);
+        LOG.info("sending complete record for key " + key + " to replay tracker");
+        try {
+            String svc = REPLAY_TRACKER_ENDPOINT != null ? REPLAY_TRACKER_ENDPOINT : "streams-replay-tracker:8080";
+            URL url = new URL("http://" +svc + "/game/replay");
+
+            LOG.info("sending " + key + " to URL: " + url.toString());
+
+            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("User-Agent","Mozilla/5.0 ( compatible ) ");
+            conn.setRequestProperty("Accept","*/*");
+            conn.setDoOutput(true);
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
+
+            try(OutputStream os = conn.getOutputStream()) {
+                byte[] input = completeGameRecord.encode().getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            try(BufferedReader br = new BufferedReader(
+            new InputStreamReader(conn.getInputStream(), "utf-8"))) {
+                StringBuilder response = new StringBuilder();
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+                LOG.info("response replay tracker was: " + response.toString());
+            }
+        } catch (Exception e) {
+            LOG.error("error posting complete game to replay tracker");
+            e.printStackTrace();
+        }
     }
 }
