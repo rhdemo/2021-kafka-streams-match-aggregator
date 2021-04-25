@@ -21,6 +21,7 @@ public class Aggregate {
     final public static String INCOMING_KEY_PLAYER_A = "playerA";
     final public static String INCOMING_KEY_PLAYER_B = "playerB";
     final public static String INCOMING_KEY_PLAYER_UUID = "uuid";
+    final public static String INCOMING_KEY_SCORE = "score";
     final public static String INCOMING_KEY_PLAYER_USERNAME = "username";
     final public static String INCOMING_KEY_PLAYER_BOARD = "board";
     final public static String INCOMING_KEY_WINNER = "winner";
@@ -32,6 +33,7 @@ public class Aggregate {
 
     final public static String AGGREGATE_KEY_GAME_ID = "gameId";
     final public static String AGGREGATE_KEY_MATCH_ID = "matchId";
+    final public static String AGGREGATE_KEY_SCORE = "score";
     final public static String AGGREGATE_KEY_TS_START = "startTs";
     final public static String AGGREGATE_KEY_PLAYER_A = "playerA";
     final public static String AGGREGATE_KEY_PLAYER_B = "playerB";
@@ -84,14 +86,13 @@ public class Aggregate {
         } else if (type.equals(PAYLOAD_END)){
             LOG.info("received match-end payload");
 
-            // Note the winner's UUID
+            // Note the winner's UUID, score, and match end timestamp
             aggregate.put(
                 AGGREGATE_KEY_WINNER,
                 data.getJsonObject(INCOMING_KEY_WINNER).getString(INCOMING_KEY_PLAYER_UUID)
             );
-
-            // Record the match end timestamp
             aggregate.put(AGGREGATE_KEY_TS_END, incoming.getLong(INCOMING_KEY_TS));
+            aggregate.put(AGGREGATE_KEY_SCORE, data.getInteger(INCOMING_KEY_SCORE));
 
             postGameToReplayTracker(aggregate);
         } else if (type.equals(PAYLOAD_ATTACK)) {
