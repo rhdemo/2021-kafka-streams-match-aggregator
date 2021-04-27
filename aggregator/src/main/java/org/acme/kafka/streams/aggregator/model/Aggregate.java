@@ -68,8 +68,8 @@ public class Aggregate {
         String type = incoming.getString("type");
         JsonObject data = incoming.getJsonObject("data");
 
-        LOG.info("processing payload:");
-        LOG.info(incoming.toString());
+        LOG.debug("processing payload:");
+        LOG.debug(incoming.toString());
 
         if (type.equals(PAYLOAD_START)) {
             LOG.info("received match-start payload");
@@ -121,7 +121,7 @@ public class Aggregate {
             LOG.warn("received unknown payload type \"" + type + "\". Not updating aggregate.");
         }
 
-        LOG.info("updated aggregate JSON: " + aggregate.encode());
+        LOG.debug("updated aggregate JSON: " + aggregate.encode());
 
         return aggregate;
     }
@@ -137,7 +137,7 @@ public class Aggregate {
             String svc = REPLAY_TRACKER_ENDPOINT != null ? REPLAY_TRACKER_ENDPOINT : "streams-replay-tracker:8080";
             URL url = new URL("http://" +svc + "/game/replay");
 
-            LOG.info("sending " + key + " to URL: " + url.toString());
+            LOG.debug("sending " + key + " to URL: " + url.toString());
 
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("POST");
@@ -160,7 +160,7 @@ public class Aggregate {
                 while ((responseLine = br.readLine()) != null) {
                     response.append(responseLine.trim());
                 }
-                LOG.info("response replay tracker was: " + response.toString());
+                LOG.debug("response replay tracker was: " + response.toString());
             }
         } catch (Exception e) {
             LOG.error("error posting complete game to replay tracker");

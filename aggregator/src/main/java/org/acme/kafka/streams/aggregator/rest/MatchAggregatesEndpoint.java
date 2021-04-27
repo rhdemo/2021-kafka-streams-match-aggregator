@@ -40,14 +40,14 @@ public class MatchAggregatesEndpoint {
         String id = gameId + ":" + matchId;
 
         QueryResult result = interactiveQueries.getPlayerMatchesStore(id);
-        LOG.info("result for " + id + " is on host:" + result.getHost());
-        LOG.info("result is present:" + result.getResult().isPresent());
+        LOG.debug("result for " + id + " is on host:" + result.getHost());
+        LOG.debug("result is present:" + result.getResult().isPresent());
         if (result.getResult().isPresent()) {
-            LOG.info("returning result from self");
+            LOG.debug("returning result from self");
             return Response.ok(result.getResult().get()).build();
         } else if (result.getHost().isPresent()) {
             URL url = getOtherUrl(result.getHost().get(), result.getPort().getAsInt(), gameId, matchId);
-            LOG.info("get for key/id was found in node at URL: " + url.toString());
+            LOG.debug("get for key/id was found in node at URL: " + url.toString());
             try {
                 HttpURLConnection conn = (HttpURLConnection)url.openConnection();
                 conn.setRequestMethod("GET");

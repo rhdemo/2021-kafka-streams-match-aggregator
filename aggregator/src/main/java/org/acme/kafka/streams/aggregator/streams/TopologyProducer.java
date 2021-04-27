@@ -46,12 +46,12 @@ public class TopologyProducer {
                     JsonObject aggregateJson;
 
                     if (aggregate.length() > 0) {
-                        LOG.info("existing aggregate found, will append");
+                        LOG.debug("existing aggregate found, will append");
                         // Create a JSON object from existing aggregate data
                         aggregateJson = new JsonObject(aggregate);
                     } else {
                         // Create a new empty JSON object
-                        LOG.info("no existing aggregate. creating initial JSON object");
+                        LOG.debug("no existing aggregate. creating initial JSON object");
                         aggregateJson = new JsonObject();
                     }
 
